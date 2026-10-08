@@ -36,7 +36,7 @@ function PriceItem({ product }: { product: Product }) {
       : `${numberFormat.format(Math.abs(product.change.pct))}%`;
 
   return (
-    <span className="inline-flex min-h-[31px] flex-none items-center gap-[7px] whitespace-nowrap border-r border-[#e9eeea] px-3 text-xs text-[#37443b]">
+    <span className="inline-flex min-h-7.75 flex-none items-center gap-1.75 whitespace-nowrap border-r border-[#e9eeea] px-3 text-xs text-[#37443b]">
       <span aria-hidden="true" className="text-xs">
         {product.categoryIcon}
       </span>
@@ -79,20 +79,12 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
         if (categoryResult.status === "fulfilled") {
           setCategories(categoryResult.value);
         } else {
-          console.error(
-            "Could not load Bazar Dor categories:",
-            categoryResult.reason,
-          );
           setCategoryError(true);
         }
 
         if (productResult.status === "fulfilled") {
           setProducts(productResult.value);
         } else {
-          console.error(
-            "Could not load Bazar Dor prices:",
-            productResult.reason,
-          );
           setProductError(true);
         }
       },
@@ -105,15 +97,15 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
 
   return (
     <header className="sticky top-0 z-20 w-full border-b border-[#e8eeea] bg-white">
-      <div className="mx-auto flex min-h-[58px] max-w-[1180px] items-center justify-between px-3 py-2 sm:min-h-[62px] sm:px-4">
+      <div className="mx-auto flex min-h-14.5 max-w-295 items-center justify-between px-3 py-2 sm:min-h-15.5 sm:px-4">
         <Link
-          className="inline-flex items-center gap-[7px] text-inherit no-underline"
+          className="inline-flex items-center gap-1.75 text-inherit no-underline"
           href="/"
           aria-label="বাজার দর - হোম"
         >
           <span
             aria-hidden="true"
-            className="grid size-[34px] place-items-center rounded-[10px] bg-[#078b4b] text-xl sm:size-9"
+            className="grid size-8.5 place-items-center rounded-[10px] bg-[#078b4b] text-xl sm:size-9"
           >
             🛒
           </span>
@@ -144,7 +136,7 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
       </div>
 
       <nav aria-label="পণ্যের বিভাগ" className="border-t border-[#f1f4f2]">
-        <div className="scrollbar-none mx-auto flex min-h-11 w-full max-w-[1180px] items-center justify-start gap-1 overflow-x-auto px-3 py-1 sm:px-4">
+        <div className="scrollbar-none mx-auto flex min-h-11 w-full max-w-295 items-center justify-start gap-1 overflow-x-auto px-3 py-1 sm:px-4">
           {categories.map((category) => {
             const isActive = category.slug === currentCategory;
             return (
@@ -185,14 +177,14 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
       >
         {productError ? (
           <p
-            className="m-0 px-3 py-[7px] text-center text-xs text-[#a33b2e]"
+            className="m-0 px-3 py-1.75 text-center text-xs text-[#a33b2e]"
             role="status"
           >
             বাজারদরের তথ্য এই মুহূর্তে পাওয়া যাচ্ছে না
           </p>
         ) : products.length === 0 ? (
           <p
-            className="m-0 px-3 py-[7px] text-center text-xs text-[#536158]"
+            className="m-0 px-3 py-1.75 text-center text-xs text-[#536158]"
             role="status"
           >
             বাজারদরের তথ্য লোড হচ্ছে…

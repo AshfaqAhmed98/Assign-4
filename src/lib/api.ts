@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://api.api-store.workers.dev/api/bazardor";
+export const API_BASE_URL = "/api/bazardor";
 
 export type Category = {
   id: string;
@@ -29,7 +29,9 @@ async function fetchList<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`Bazar Dor API ${endpoint} returned ${response.status}`);
+    throw new Error(
+      `Bazar Dor API ${endpoint} returned ${response.status}: ${response.statusText}`,
+    );
   }
 
   const data: unknown = await response.json();
