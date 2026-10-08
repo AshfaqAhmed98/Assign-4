@@ -1,2 +1,20 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@theme {
+  --animate-ticker-scroll: ticker-scroll 78s linear infinite;
+
+  @keyframes ticker-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
