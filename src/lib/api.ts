@@ -11,6 +11,7 @@ export type Product = {
   id: number;
   slug: string;
   nameBn: string;
+  image?: string;
   categoryIcon: string;
   today: number;
   unit: string;

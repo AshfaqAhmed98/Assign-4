@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     try {
       upstream = await fetch(`${baseUrl}/${resource}`, {
         headers: { Accept: "application/json" },
-        cache: "no-store",
+        next: { revalidate: 300 },
       });
     } catch (error) {
       console.error(

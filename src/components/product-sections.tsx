@@ -1,0 +1,179 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getProducts, type Product } from "@/lib/api";
+
+const numberFormat = new Intl.NumberFormat("bn-BD", {
+  maximumFractionDigits: 1,
+});
+
+const unitNames: Record<string, string> = {
+  kg: "প্রতি কেজি",
+  litre: "প্রতি লিটার",
+  liter: "প্রতি লিটার",
+  dozen: "প্রতি ডজন",
+  piece: "প্রতি পিস",
+};
+
+function ProductCard({ product }: { product: Product }) {
+  const isUp = product.change.dir === "up";
+  const isDown = product.change.dir === "down";
+  const changeBadge = isUp
+    ? `▲ ${numberFormat.format(Math.abs(product.change.pct))}%`
+    : isDown
+      ? `▼ ${numberFormat.format(Math.abs(product.change.pct))}%`
+      : "— ০.০%";
+
+  return (
+    <article className="flex min-h-36 flex-col justify-between rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <div className="flex items-start gap-3">
+        <span
+          aria-hidden="true"
+          className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f0f5f1] text-2xl"
+        >
+          {product.image || product.categoryIcon || "🛒"}
+        </span>
+        <div className="min-w-0 pt-0.5">
+          <h3 className="truncate text-base font-bold text-[#28332e] sm:text-lg">
+            {product.nameBn}
+          </h3>
+          <p className="mt-0.5 text-sm text-[#77827c]">
+            {unitNames[product.unit] ?? `প্রতি ${product.unit}`}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-end justify-between gap-2">
+        <div>
+          <p className="text-xs text-[#77827c]">আজকের দাম</p>
+          <p className="mt-0.5 text-lg font-bold text-[#28332e]">
+            {numberFormat.format(product.today)} টাকা
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+            isUp
+              ? "bg-[#e9f5ed] text-[#15934b]"
+              : isDown
+                ? "bg-[#fceeed] text-[#d13d39]"
+                : "bg-[#f0f2f0] text-[#77827c]"
+          }`}
+        >
+          {changeBadge}
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function ProductCardGrid({ products }: { products: Product[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+export function ProductSections() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    void getProducts()
+      .then((data) => {
+        if (active) setProducts(data);
+      })
+      .catch((error: unknown) => {
+        console.error("Could not load products for the home page:", error);
+        if (active) setLoadError(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loadError) {
+    return (
+      <p className="rounded-xl border border-[#f0d7d4] bg-white p-5 text-sm text-[#a33b2e]">
+        পণ্যের তথ্য লোড করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।
+      </p>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <p className="rounded-xl border border-[#e0e9e2] bg-white p-5 text-sm text-[#68736c]">
+        পণ্যের তথ্য লোড হচ্ছে…
+      </p>
+    );
+  }
+
+  const risers = products
+    .filter((product) => product.change.dir === "up")
+    .sort((a, b) => b.change.pct - a.change.pct)
+    .slice(0, 6);
+  const fallers = products
+    .filter((product) => product.change.dir === "down")
+    .sort((a, b) => a.change.pct - b.change.pct)
+    .slice(0, 6);
+
+  return (
+    <div className="space-y-10">
+      <section aria-labelledby="risers-title">
+        <h2
+          className="mb-4 flex items-center gap-2 text-xl font-bold text-[#28332e] sm:text-2xl"
+          id="risers-title"
+        >
+          <span aria-hidden="true" className="text-[#d13d39]">
+            ▲
+          </span>
+          আজ দাম বেড়েছে
+        </h2>
+        {risers.length > 0 ? (
+          <ProductCardGrid products={risers} />
+        ) : (
+          <p className="text-sm text-[#68736c]">আজ কোনো পণ্যের দাম বাড়েনি।</p>
+        )}
+      </section>
+
+      <section aria-labelledby="fallers-title">
+        <h2
+          className="mb-4 flex items-center gap-2 text-xl font-bold text-[#28332e] sm:text-2xl"
+          id="fallers-title"
+        >
+          <span aria-hidden="true" className="text-[#15934b]">
+            ▼
+          </span>
+          আজ দাম কমেছে
+        </h2>
+        {fallers.length > 0 ? (
+          <ProductCardGrid products={fallers} />
+        ) : (
+          <p className="text-sm text-[#68736c]">আজ কোনো পণ্যের দাম কমেনি।</p>
+        )}
+      </section>
+
+      <section aria-labelledby="all-products-heading">
+        <h2
+          className="text-2xl font-bold text-[#1f2b23] sm:text-3xl"
+          id="all-products-heading"
+        >
+          সব পণ্য
+        </h2>
+        <p className="mb-5 mt-1 text-sm text-[#68736c] sm:text-base">
+          বাজারের সব পণ্যের আজকের দাম ও পরিবর্তন একসাথে দেখুন।
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

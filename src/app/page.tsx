@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { ProductSections } from "@/components/product-sections";
 
 async function HeroBanner() {
   await connection();
@@ -72,12 +73,10 @@ export default function Home() {
         className="mx-auto mt-10 max-w-7xl scroll-mt-40"
         id="সব-পণ্য"
       >
-        <h2
-          className="text-2xl font-bold text-[#1f2b23] sm:text-3xl"
-          id="all-products-title"
-        >
-          সব পণ্য
+        <h2 className="sr-only" id="all-products-title">
+          পণ্য ও বাজারদরের তালিকা
         </h2>
+        <ProductSections />
       </section>
     </main>
   );
