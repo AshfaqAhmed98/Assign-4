@@ -36,14 +36,16 @@ function PriceItem({ product }: { product: Product }) {
       : `${numberFormat.format(Math.abs(product.change.pct))}%`;
 
   return (
-    <span className="inline-flex min-h-7.75 flex-none items-center gap-1.75 whitespace-nowrap border-r border-[#e9eeea] px-3 text-xs text-[#37443b]">
-      <span aria-hidden="true" className="text-xs">
+    <span className="inline-flex min-h-10 flex-none items-center gap-1.75 whitespace-nowrap border-r border-[#e1e9e3] px-3 text-[13px] leading-6 text-[#28332e]">
+      <span aria-hidden="true" className="text-sm">
         {product.categoryIcon}
       </span>
-      <span>{product.nameBn}</span>
-      <span className="text-[#536158]">{formatPrice(product)}</span>
+      <span className="font-semibold">{product.nameBn}</span>
+      <span className="font-semibold text-[#3f4d43]">
+        {formatPrice(product)}
+      </span>
       <span
-        className={`inline-flex items-center gap-1 text-[11px] font-bold ${
+        className={`inline-flex items-center gap-1 text-[13px] font-bold ${
           isUp
             ? "text-[#d13d39]"
             : isDown
@@ -110,10 +112,10 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
             🛒
           </span>
           <span className="flex flex-col gap-px">
-            <span className="text-sm leading-[1.2] font-bold sm:text-base">
+            <span className="text-sm leading-relaxed font-bold sm:text-base">
               বাজার দর
             </span>
-            <span className="max-w-[47vw] overflow-hidden text-[10px] leading-[1.3] text-ellipsis whitespace-nowrap text-[#77827c] sm:text-[11px]">
+            <span className="max-w-[47vw] overflow-hidden text-[11px] leading-relaxed text-ellipsis whitespace-nowrap text-[#77827c] sm:text-xs">
               {banglaDate || "আজকের তারিখ"}
             </span>
           </span>
@@ -121,13 +123,13 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
 
         <div className="flex items-center gap-1 sm:gap-2">
           <Link
-            className="inline-flex min-h-9 items-center justify-center rounded-md px-3 text-xs font-semibold whitespace-nowrap text-[#34423a] no-underline transition-colors duration-150 hover:bg-[#f0f6f2] sm:px-4 sm:text-[13px]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-[#34423a] no-underline transition-colors duration-150 hover:bg-[#f0f6f2] sm:px-4"
             href="/sign-in"
           >
             সাইন ইন
           </Link>
           <Link
-            className="inline-flex min-h-9 items-center justify-center rounded-md bg-[#078b4b] px-3 text-xs font-semibold whitespace-nowrap text-white no-underline transition-colors duration-150 hover:bg-[#06743f] sm:px-4 sm:text-[13px]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#078b4b] px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-white no-underline transition-colors duration-150 hover:bg-[#06743f] sm:px-4"
             href="/sign-up"
           >
             সাইন আপ
@@ -142,7 +144,7 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
             return (
               <Link
                 aria-current={isActive ? "page" : undefined}
-                className={`inline-flex min-h-9 flex-none items-center gap-2 rounded-md px-3 text-[13px] whitespace-nowrap no-underline transition-colors duration-150 ${
+                className={`inline-flex min-h-10 flex-none items-center gap-2 rounded-md px-3 text-sm leading-6 whitespace-nowrap no-underline transition-colors duration-150 ${
                   isActive
                     ? "bg-[#e7f5ec] font-bold text-[#06743f]"
                     : "font-medium text-[#435047] hover:bg-[#f0f6f2] hover:text-[#06743f]"
@@ -157,14 +159,14 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
           })}
           {categoryError && (
             <span
-              className="shrink-0 self-center whitespace-nowrap text-xs text-[#a33b2e]"
+              className="shrink-0 self-center whitespace-nowrap text-[13px] text-[#a33b2e]"
               role="status"
             >
               বিভাগ লোড করা যায়নি
             </span>
           )}
           {!categoryError && categories.length === 0 && (
-            <span className="shrink-0 self-center whitespace-nowrap text-xs text-[#77827c]">
+            <span className="shrink-0 self-center whitespace-nowrap text-[13px] text-[#77827c]">
               বিভাগ লোড হচ্ছে…
             </span>
           )}
@@ -173,24 +175,27 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
 
       <section
         aria-label="বাজারদরের আপডেট"
-        className="min-h-8 overflow-hidden border-t border-[#edf1ee] bg-[#fbfcfb]"
+        className="min-h-10 overflow-hidden border-t border-[#e1e9e3] bg-[#fbfcfb]"
       >
         {productError ? (
           <p
-            className="m-0 px-3 py-1.75 text-center text-xs text-[#a33b2e]"
+            className="m-0 px-3 py-2 text-[13px] leading-6 text-[#a33b2e]"
             role="status"
           >
             বাজারদরের তথ্য এই মুহূর্তে পাওয়া যাচ্ছে না
           </p>
         ) : products.length === 0 ? (
           <p
-            className="m-0 px-3 py-1.75 text-center text-xs text-[#536158]"
+            className="m-0 px-3 py-2 text-[13px] leading-6 text-[#3f4d43]"
             role="status"
           >
             বাজারদরের তথ্য লোড হচ্ছে…
           </p>
         ) : (
-          <div className="overflow-hidden">
+          <div
+            aria-label="পণ্যের বর্তমান দাম ও দৈনিক পরিবর্তন"
+            className="overflow-hidden"
+          >
             <div className="flex w-max animate-ticker-scroll hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none">
               {[0, 1].map((copy) => (
                 <div

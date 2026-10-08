@@ -1,7 +1,15 @@
 import { MarketHeader } from "@/components/market-header";
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
+
+const notoSansBengali = Noto_Sans_Bengali({
+  subsets: ["bengali", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-sans-bengali",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Bazar Dor",
@@ -10,8 +18,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="bn" className="h-full scroll-smooth antialiased">
-      <body className="min-h-full min-w-[320px] flex flex-col bg-white font-sans text-[#28332e]">
+    <html
+      lang="bn"
+      className={`${notoSansBengali.variable} h-full scroll-smooth antialiased`}
+    >
+      <body
+        className={`${notoSansBengali.className} min-h-full min-w-[320px] flex flex-col bg-white text-[#28332e]`}
+      >
         <Suspense
           fallback={
             <header

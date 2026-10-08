@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getProducts, type Product } from "@/lib/api";
 
 const numberFormat = new Intl.NumberFormat("bn-BD", {
@@ -25,44 +26,50 @@ function ProductCard({ product }: { product: Product }) {
       : "— ০.০%";
 
   return (
-    <article className="flex min-h-36 flex-col justify-between rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
-      <div className="flex items-start gap-3">
-        <span
-          aria-hidden="true"
-          className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f0f5f1] text-2xl"
-        >
-          {product.image || product.categoryIcon || "🛒"}
-        </span>
-        <div className="min-w-0 pt-0.5">
-          <h3 className="truncate text-base font-bold text-[#28332e] sm:text-lg">
-            {product.nameBn}
-          </h3>
-          <p className="mt-0.5 text-sm text-[#77827c]">
-            {unitNames[product.unit] ?? `প্রতি ${product.unit}`}
-          </p>
+    <Link
+      aria-label={`${product.nameBn} এর বিস্তারিত দেখুন`}
+      className="group block rounded-2xl no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#078b4b]"
+      href={`/product/${product.slug}`}
+    >
+      <article className="flex min-h-[138px] flex-col justify-between rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-4 shadow-[0_1px_3px_rgba(31,43,35,0.04)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-[#cbded0] group-hover:shadow-md">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f0f5f1] text-[26px]"
+          >
+            {product.image || product.categoryIcon || "🛒"}
+          </span>
+          <div className="min-w-0">
+            <h3 className="line-clamp-2 min-h-6 text-[15px] leading-6 font-semibold text-[#28332e] sm:text-base">
+              {product.nameBn}
+            </h3>
+            <p className="mt-0.5 text-[13px] leading-5 text-[#77827c] sm:text-sm">
+              {unitNames[product.unit] ?? `প্রতি ${product.unit}`}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4 flex items-end justify-between gap-2">
-        <div>
-          <p className="text-xs text-[#77827c]">আজকের দাম</p>
-          <p className="mt-0.5 text-lg font-bold text-[#28332e]">
-            {numberFormat.format(product.today)} টাকা
-          </p>
+        <div className="mt-3 flex items-end justify-between gap-2">
+          <div>
+            <p className="text-xs leading-5 text-[#77827c]">আজকের দাম</p>
+            <p className="mt-0.5 text-lg leading-7 font-bold text-[#28332e]">
+              {numberFormat.format(product.today)} টাকা
+            </p>
+          </div>
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-[13px] leading-6 font-semibold ${
+              isUp
+                ? "bg-[#e9f5ed] text-[#15934b]"
+                : isDown
+                  ? "bg-[#fceeed] text-[#d13d39]"
+                  : "bg-[#f0f2f0] text-[#77827c]"
+            }`}
+          >
+            {changeBadge}
+          </span>
         </div>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
-            isUp
-              ? "bg-[#e9f5ed] text-[#15934b]"
-              : isDown
-                ? "bg-[#fceeed] text-[#d13d39]"
-                : "bg-[#f0f2f0] text-[#77827c]"
-          }`}
-        >
-          {changeBadge}
-        </span>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }
 
@@ -99,7 +106,7 @@ export function ProductSections() {
 
   if (loadError) {
     return (
-      <p className="rounded-xl border border-[#f0d7d4] bg-white p-5 text-sm text-[#a33b2e]">
+      <p className="rounded-xl border border-[#f0d7d4] bg-white p-5 text-sm leading-7 text-[#a33b2e]">
         পণ্যের তথ্য লোড করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।
       </p>
     );
@@ -107,7 +114,7 @@ export function ProductSections() {
 
   if (products.length === 0) {
     return (
-      <p className="rounded-xl border border-[#e0e9e2] bg-white p-5 text-sm text-[#68736c]">
+      <p className="rounded-xl border border-[#e0e9e2] bg-white p-5 text-sm leading-7 text-[#68736c]">
         পণ্যের তথ্য লোড হচ্ছে…
       </p>
     );
@@ -123,10 +130,10 @@ export function ProductSections() {
     .slice(0, 6);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-9 sm:space-y-10">
       <section aria-labelledby="risers-title">
         <h2
-          className="mb-4 flex items-center gap-2 text-xl font-bold text-[#28332e] sm:text-2xl"
+          className="mb-4 flex items-center gap-2 text-xl leading-relaxed font-bold text-[#28332e] sm:mb-5 sm:text-2xl"
           id="risers-title"
         >
           <span aria-hidden="true" className="text-[#d13d39]">
@@ -137,13 +144,13 @@ export function ProductSections() {
         {risers.length > 0 ? (
           <ProductCardGrid products={risers} />
         ) : (
-          <p className="text-sm text-[#68736c]">আজ কোনো পণ্যের দাম বাড়েনি।</p>
+          <p className="text-sm leading-7 text-[#68736c]">আজ কোনো পণ্যের দাম বাড়েনি।</p>
         )}
       </section>
 
       <section aria-labelledby="fallers-title">
         <h2
-          className="mb-4 flex items-center gap-2 text-xl font-bold text-[#28332e] sm:text-2xl"
+          className="mb-4 flex items-center gap-2 text-xl leading-relaxed font-bold text-[#28332e] sm:mb-5 sm:text-2xl"
           id="fallers-title"
         >
           <span aria-hidden="true" className="text-[#15934b]">
@@ -154,21 +161,21 @@ export function ProductSections() {
         {fallers.length > 0 ? (
           <ProductCardGrid products={fallers} />
         ) : (
-          <p className="text-sm text-[#68736c]">আজ কোনো পণ্যের দাম কমেনি।</p>
+          <p className="text-sm leading-7 text-[#68736c]">আজ কোনো পণ্যের দাম কমেনি।</p>
         )}
       </section>
 
       <section aria-labelledby="all-products-heading">
         <h2
-          className="text-2xl font-bold text-[#1f2b23] sm:text-3xl"
+          className="text-2xl leading-relaxed font-bold text-[#1f2b23] sm:text-3xl"
           id="all-products-heading"
         >
           সব পণ্য
         </h2>
-        <p className="mb-5 mt-1 text-sm text-[#68736c] sm:text-base">
+        <p className="mb-5 mt-1 text-sm leading-7 text-[#68736c] sm:mb-6 sm:text-base">
           বাজারের সব পণ্যের আজকের দাম ও পরিবর্তন একসাথে দেখুন।
         </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

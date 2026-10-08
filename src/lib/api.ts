@@ -13,12 +13,23 @@ export type Product = {
   nameBn: string;
   image?: string;
   categoryIcon: string;
+  category?: string;
+  categoryNameBn?: string;
   today: number;
+  yesterday?: number;
   unit: string;
   change: {
     dir: "up" | "down" | "flat";
     pct: number;
   };
+  markets?: ProductMarket[];
+};
+
+export type ProductMarket = {
+  market: string;
+  division: string;
+  min: number;
+  max: number;
 };
 
 async function fetchList<T>(
@@ -63,6 +74,7 @@ function isProduct(value: unknown): value is Product {
     typeof product.nameBn !== "string" ||
     typeof product.categoryIcon !== "string" ||
     typeof product.today !== "number" ||
+    (product.yesterday !== undefined && typeof product.yesterday !== "number") ||
     typeof product.unit !== "string" ||
     typeof product.change !== "object" ||
     product.change === null
@@ -71,9 +83,28 @@ function isProduct(value: unknown): value is Product {
   }
 
   const change = product.change as Record<string, unknown>;
-  return (
+  const validChange =
     (change.dir === "up" || change.dir === "down" || change.dir === "flat") &&
-    typeof change.pct === "number"
+    typeof change.pct === "number";
+  const validOptionalFields =
+    (product.image === undefined || typeof product.image === "string") &&
+    (product.category === undefined || typeof product.category === "string") &&
+    (product.categoryNameBn === undefined ||
+      typeof product.categoryNameBn === "string") &&
+    (product.markets === undefined ||
+      (Array.isArray(product.markets) && product.markets.every(isProductMarket)));
+
+  return validChange && validOptionalFields;
+}
+
+function isProductMarket(value: unknown): value is ProductMarket {
+  if (typeof value !== "object" || value === null) return false;
+  const market = value as Record<string, unknown>;
+  return (
+    typeof market.market === "string" &&
+    typeof market.division === "string" &&
+    typeof market.min === "number" &&
+    typeof market.max === "number"
   );
 }
 
