@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,6 +10,8 @@ import {
   type Category,
   type Product,
 } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
+import { useToast } from "@/components/toast-provider";
 
 const numberFormat = new Intl.NumberFormat("bn-BD", {
   maximumFractionDigits: 1,
@@ -59,12 +62,48 @@ function PriceItem({ product }: { product: Product }) {
   );
 }
 
+function UserAvatar({
+  name,
+  image,
+}: {
+  name: string;
+  image?: string | null;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const initials = name.trim().charAt(0).toLocaleUpperCase("bn-BD") || "👤";
+
+  return (
+    <span
+      aria-hidden="true"
+      className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[#e0e9e2] bg-[#e7f5ec] text-sm font-semibold text-[#06743f]"
+    >
+      {image && !imageFailed ? (
+        <Image
+          alt=""
+          className="size-full object-cover"
+          height={36}
+          onError={() => setImageFailed(true)}
+          src={image}
+          unoptimized
+          width={36}
+        />
+      ) : (
+        initials
+      )}
+    </span>
+  );
+}
+
 export function Navbar({ banglaDate }: { banglaDate: string }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryError, setCategoryError] = useState(false);
   const [productError, setProductError] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
+  const showToast = useToast();
   const currentCategory = pathname.startsWith("/category/")
     ? pathname.slice("/category/".length)
     : pathname === "/"
@@ -97,6 +136,23 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
     };
   }, []);
 
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        showToast(result.error.message || "সাইন আউট করা যায়নি।", "error");
+        return;
+      }
+      showToast("সাইন আউট সফল হয়েছে", "success");
+    } catch (error: unknown) {
+      console.error("Could not sign out:", error);
+      showToast("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।", "error");
+    } finally {
+      setIsSigningOut(false);
+    }
+  }
+
   return (
     <header className="sticky top-0 z-20 w-full border-b border-[#e8eeea] bg-white">
       <div className="mx-auto flex min-h-14.5 max-w-295 items-center justify-between px-3 py-2 sm:min-h-15.5 sm:px-4">
@@ -122,18 +178,52 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-[#34423a] no-underline transition-colors duration-150 hover:bg-[#f0f6f2] sm:px-4"
-            href="/sign-in"
-          >
-            সাইন ইন
-          </Link>
-          <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#078b4b] px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-white no-underline transition-colors duration-150 hover:bg-[#06743f] sm:px-4"
-            href="/sign-up"
-          >
-            সাইন আপ
-          </Link>
+          {isSessionPending ? (
+            <span
+              aria-label="অ্যাকাউন্ট লোড হচ্ছে"
+              className="h-9 w-28 animate-pulse rounded-md bg-[#edf2ee]"
+              role="status"
+            />
+          ) : session?.user ? (
+            <>
+              <span
+                aria-label={`${session.user.name} এর প্রোফাইল`}
+                className="inline-flex min-w-0 items-center gap-2"
+                title={session.user.name}
+              >
+                <UserAvatar
+                  image={session.user.image}
+                  name={session.user.name}
+                />
+                <span className="hidden max-w-36 truncate text-sm font-medium text-[#34423a] sm:inline">
+                  {session.user.name}
+                </span>
+              </span>
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#f0d7d4] px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-[#a33b2e] transition-colors hover:bg-[#fff7f6] disabled:opacity-60 sm:px-4"
+                disabled={isSigningOut}
+                onClick={() => void handleSignOut()}
+                type="button"
+              >
+                {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                className="inline-flex min-h-10 items-center justify-center rounded-md px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-[#34423a] no-underline transition-colors duration-150 hover:bg-[#f0f6f2] sm:px-4"
+                href="/signin"
+              >
+                সাইন ইন
+              </Link>
+              <Link
+                className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#078b4b] px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-white no-underline transition-colors duration-150 hover:bg-[#06743f] sm:px-4"
+                href="/signup"
+              >
+                সাইন আপ
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

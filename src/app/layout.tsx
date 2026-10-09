@@ -1,6 +1,8 @@
 import { MarketHeader } from "@/components/market-header";
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { AuthToastListener } from "@/components/auth-toast-listener";
+import { ToastProvider } from "@/components/toast-provider";
 import { Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 
@@ -19,24 +21,30 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
+      data-scroll-behavior="smooth"
       lang="bn"
       className={`${notoSansBengali.variable} h-full scroll-smooth antialiased`}
     >
       <body
         className={`${notoSansBengali.className} min-h-full min-w-[320px] flex flex-col bg-white text-[#28332e]`}
       >
-        <Suspense
-          fallback={
-            <header
-              aria-busy="true"
-              aria-label="বাজারদরের তথ্য লোড হচ্ছে"
-              className="market-header market-header-loading"
-            />
-          }
-        >
-          <MarketHeader />
-        </Suspense>
-        {children}
+        <ToastProvider>
+          <Suspense fallback={null}>
+            <AuthToastListener />
+          </Suspense>
+          <Suspense
+            fallback={
+              <header
+                aria-busy="true"
+                aria-label="বাজারদরের তথ্য লোড হচ্ছে"
+                className="market-header market-header-loading"
+              />
+            }
+          >
+            <MarketHeader />
+          </Suspense>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );
