@@ -62,7 +62,7 @@ function MarketRow({ market }: { market: ProductMarket }) {
 
 function LoadingState() {
   return (
-    <main className="min-h-screen bg-[#f0f5f1] px-4 py-8 sm:px-6">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-6xl animate-pulse space-y-5">
         <div className="h-5 w-48 rounded bg-[#dfe9e1]" />
         <div className="h-28 rounded-2xl bg-white" />
@@ -99,7 +99,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
   if (loadError || !product) {
     return (
-      <main className="min-h-screen bg-[#f0f5f1] px-4 py-10 sm:px-6">
+      <main className="flex-1 bg-[#f0f5f1] px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-6xl rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-6 sm:p-8">
           <h1 className="text-xl font-bold text-[#28332e]">
             {loadError ? "পণ্যের তথ্য পাওয়া যায়নি" : "পণ্যটি খুঁজে পাওয়া যায়নি"}
@@ -148,7 +148,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
       : `${actualDirection === "up" ? "▲" : "▼"} ${numberFormat.format(Math.abs(product.change.pct))}%`;
 
   return (
-    <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl">
         <nav aria-label="ব্রেডক্রাম্ব" className="mb-4 text-sm text-[#68736c]">
           <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">

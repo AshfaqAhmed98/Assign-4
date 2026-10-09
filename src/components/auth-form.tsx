@@ -50,21 +50,41 @@ function SocialButton({
   label,
   onClick,
   disabled,
+  isLoading,
 }: {
   provider: SocialProvider;
   label: string;
   onClick: (provider: SocialProvider) => void;
   disabled: boolean;
+  isLoading: boolean;
 }) {
   return (
     <button
-      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[#dce8df] bg-white px-3 text-sm font-semibold text-[#34423a] transition-colors hover:bg-[#f5f8f5] disabled:cursor-not-allowed disabled:opacity-60"
+      aria-label={label}
+      aria-busy={isLoading}
+      className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-[#dce8df] bg-white px-1.5 text-[10px] font-semibold whitespace-nowrap text-[#28332e] transition-colors hover:border-[#b8cfbf] hover:bg-[#f5f8f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#078b4b] disabled:cursor-wait disabled:opacity-60 sm:min-h-10 sm:gap-2 sm:px-2 sm:text-xs"
       disabled={disabled}
       onClick={() => onClick(provider)}
       type="button"
     >
-      {provider === "google" ? <GoogleIcon /> : <GitHubIcon />}
-      {label}
+      {isLoading ? (
+        <span
+          aria-hidden="true"
+          className="size-5 shrink-0 animate-spin rounded-full border-2 border-[#078b4b]/25 border-t-[#078b4b]"
+        />
+      ) : provider === "google" ? (
+        <GoogleIcon />
+      ) : (
+        <GitHubIcon />
+      )}
+      <span className="hidden min-[360px]:inline">
+        {isLoading
+          ? `${provider === "google" ? "Google" : "GitHub"}-এ যাচ্ছেন…`
+          : label}
+      </span>
+      <span className="min-[360px]:hidden">
+        {isLoading ? "যাচ্ছেন…" : provider === "google" ? "Google" : "GitHub"}
+      </span>
     </button>
   );
 }
@@ -75,6 +95,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const showToast = useToast();
   const socialSignInPending = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [socialProviderPending, setSocialProviderPending] =
+    useState<SocialProvider | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   function showError(message: string) {
@@ -155,6 +177,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     if (socialSignInPending.current) return;
     socialSignInPending.current = true;
     setErrorMessage("");
+    setSocialProviderPending(provider);
     setIsSubmitting(true);
     try {
       const result = await authClient.signIn.social({
@@ -170,6 +193,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             : message || `${providerName} দিয়ে সাইন ইন করা যায়নি।`,
         );
         socialSignInPending.current = false;
+        setSocialProviderPending(null);
         setIsSubmitting(false);
       }
     } catch (error: unknown) {
@@ -178,12 +202,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         `${provider === "google" ? "Google" : "GitHub"} দিয়ে সাইন ইন করা যায়নি। OAuth সেটিংস যাচাই করুন।`,
       );
       socialSignInPending.current = false;
+      setSocialProviderPending(null);
       setIsSubmitting(false);
     }
   }
 
   return (
-    <main className="min-h-[calc(100vh-8rem)] bg-[#f0f5f1] px-4 py-10 sm:px-6 sm:py-14">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-10 sm:px-6 sm:py-14">
       <section className="mx-auto w-full max-w-md">
         <div className="mb-6 text-center">
           <h1 className="text-2xl leading-relaxed font-bold text-[#1f2b23] sm:text-3xl">
@@ -313,16 +338,18 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             <span className="h-px flex-1 bg-[#e0e9e2]" />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2">
             <SocialButton
               disabled={isSubmitting}
               label="Google দিয়ে চালিয়ে যান"
+              isLoading={socialProviderPending === "google"}
               onClick={handleSocialSignIn}
               provider="google"
             />
             <SocialButton
               disabled={isSubmitting}
               label="GitHub দিয়ে চালিয়ে যান"
+              isLoading={socialProviderPending === "github"}
               onClick={handleSocialSignIn}
               provider="github"
             />

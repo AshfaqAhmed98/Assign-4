@@ -69,7 +69,7 @@ export function CategoryProducts({ slug }: { slug: string }) {
 
   if (hasLoadError) {
     return (
-      <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+      <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
         <section className="mx-auto max-w-6xl rounded-2xl border border-[#f0d7d4] bg-[#fbfdfb] p-6 sm:p-8">
           <h1 className="text-xl font-bold text-[#a33b2e]">
             বিভাগের পণ্য লোড করা যায়নি
@@ -90,7 +90,7 @@ export function CategoryProducts({ slug }: { slug: string }) {
 
   if (!category || categoryProducts.length === 0) {
     return (
-      <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+      <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
         <section
           aria-labelledby="category-empty-title"
           className="mx-auto flex max-w-6xl flex-col items-center rounded-2xl border border-[#dce8df] bg-[#fbfdfb] px-5 py-12 text-center sm:py-16"
@@ -128,7 +128,7 @@ export function CategoryProducts({ slug }: { slug: string }) {
         : categoryProducts;
 
   return (
-    <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
       <section className="mx-auto max-w-6xl">
         <header className="flex min-h-20 items-center gap-4 rounded-2xl border border-[#dce8df] bg-[#fbfdfb] px-5 py-4 sm:px-7">
           <span
@@ -188,7 +188,7 @@ export function CategoryProducts({ slug }: { slug: string }) {
 
 export function CategoryProductsLoading() {
   return (
-    <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
       <section
         aria-busy="true"
         aria-label="বিভাগের পণ্য লোড হচ্ছে"

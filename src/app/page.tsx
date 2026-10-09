@@ -57,7 +57,7 @@ async function HeroBanner() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
+    <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
       <Suspense
         fallback={
           <div
