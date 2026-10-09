@@ -32,6 +32,16 @@ export type ProductMarket = {
   max: number;
 };
 
+const CLIENT_CACHE_DURATION_MS = 60_000;
+
+type CachedList<T> = {
+  expiresAt: number;
+  promise: Promise<T[]>;
+};
+
+let categoriesCache: CachedList<Category> | null = null;
+let productsCache: CachedList<Product> | null = null;
+
 async function fetchList<T>(
   endpoint: string,
   isValid: (value: unknown) => value is T,
@@ -54,7 +64,7 @@ async function fetchList<T>(
   return data;
 }
 
-function isCategory(value: unknown): value is Category {
+export function isCategory(value: unknown): value is Category {
   if (typeof value !== "object" || value === null) return false;
   const category = value as Record<string, unknown>;
   return (
@@ -65,7 +75,7 @@ function isCategory(value: unknown): value is Category {
   );
 }
 
-function isProduct(value: unknown): value is Product {
+export function isProduct(value: unknown): value is Product {
   if (typeof value !== "object" || value === null) return false;
   const product = value as Record<string, unknown>;
   if (
@@ -109,9 +119,33 @@ function isProductMarket(value: unknown): value is ProductMarket {
 }
 
 export function getCategories() {
-  return fetchList("categories", isCategory);
+  if (categoriesCache && categoriesCache.expiresAt > Date.now()) {
+    return categoriesCache.promise;
+  }
+
+  const promise = fetchList("categories", isCategory);
+  categoriesCache = {
+    expiresAt: Date.now() + CLIENT_CACHE_DURATION_MS,
+    promise,
+  };
+  void promise.catch(() => {
+    if (categoriesCache?.promise === promise) categoriesCache = null;
+  });
+  return promise;
 }
 
 export function getProducts() {
-  return fetchList("products", isProduct);
+  if (productsCache && productsCache.expiresAt > Date.now()) {
+    return productsCache.promise;
+  }
+
+  const promise = fetchList("products", isProduct);
+  productsCache = {
+    expiresAt: Date.now() + CLIENT_CACHE_DURATION_MS,
+    promise,
+  };
+  void promise.catch(() => {
+    if (productsCache?.promise === promise) productsCache = null;
+  });
+  return promise;
 }

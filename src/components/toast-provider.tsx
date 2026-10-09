@@ -36,20 +36,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      {toast && (
-        <div
-          aria-live={toast.type === "error" ? "assertive" : "polite"}
-          className={`fixed right-4 top-4 z-50 max-w-[calc(100vw-2rem)] rounded-xl border px-4 py-3 text-sm font-medium shadow-lg sm:right-6 sm:top-6 ${
-            toast.type === "success"
-              ? "border-[#bfe1ca] bg-[#f0faf3] text-[#06743f]"
-              : "border-[#f0d7d4] bg-[#fff7f6] text-[#a33b2e]"
-          }`}
-          key={toast.id}
-          role={toast.type === "error" ? "alert" : "status"}
-        >
-          {toast.message}
-        </div>
-      )}
+      <div
+        className="pointer-events-none fixed right-4 top-4 z-50 sm:right-6 sm:top-6"
+        data-rht-toaster=""
+      >
+        {toast && (
+          <div
+            aria-live={toast.type === "error" ? "assertive" : "polite"}
+            className={`pointer-events-auto max-w-[calc(100vw-2rem)] rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${
+              toast.type === "success"
+                ? "border-[#bfe1ca] bg-[#f0faf3] text-[#06743f]"
+                : "border-[#f0d7d4] bg-[#fff7f6] text-[#a33b2e]"
+            }`}
+            key={toast.id}
+            role={toast.type === "error" ? "alert" : "status"}
+          >
+            {toast.message}
+          </div>
+        )}
+      </div>
     </ToastContext.Provider>
   );
 }

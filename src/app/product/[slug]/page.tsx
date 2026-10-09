@@ -1,26 +1,35 @@
-import { Suspense } from "react";
-import ProductDetail from "@/components/product-detail";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getProductBySlug } from "@/lib/market-data-server";
+import ProductDetail, {
+  ProductDataUnavailable,
+} from "@/components/product-detail";
 
-type ProductPageProps = {
-  params: Promise<{ slug: string }>;
-};
+export const instant = false;
 
-export default function ProductPage({ params }: ProductPageProps) {
-  return (
-    <Suspense
-      fallback={
-        <main className="flex-1 bg-[#f0f5f1] px-4 py-8 sm:px-6">
-          <div className="mx-auto max-w-6xl animate-pulse space-y-5">
-            <div className="h-5 w-48 rounded bg-[#dfe9e1]" />
-            <div className="h-28 rounded-2xl bg-white" />
-            <div className="h-64 rounded-2xl bg-white" />
-          </div>
-        </main>
-      }
-    >
-      {params.then(({ slug }) => (
-        <ProductDetail slug={slug} />
-      ))}
-    </Suspense>
-  );
+export default async function ProductPage({
+  params,
+}: PageProps<"/product/[slug]">) {
+  const { slug } = await params;
+
+  let product;
+  try {
+    product = await getProductBySlug(slug);
+  } catch (error: unknown) {
+    console.error(`Could not load product "${slug}" for its detail page:`, error);
+    return <ProductDataUnavailable />;
+  }
+
+  if (!product) {
+    notFound();
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session?.user) {
+    redirect("/signin?redirect=protected");
+  }
+
+  return <ProductDetail product={product} />;
 }

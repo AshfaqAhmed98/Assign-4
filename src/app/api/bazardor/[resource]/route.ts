@@ -1,8 +1,8 @@
-const UPSTREAM_API_BASE_URLS = [
-  "https://api.api-store.workers.dev/api/bazardor",
-  "https://api.abcz.workers.dev/api/bazardor",
-];
-const ALLOWED_RESOURCES = new Set(["categories", "products"]);
+import {
+  getMarketCategories,
+  getMarketProducts,
+  MarketDataUnavailableError,
+} from "@/lib/market-data-server";
 
 type RouteContext = {
   params: Promise<{ resource: string }>;
@@ -11,56 +11,33 @@ type RouteContext = {
 export async function GET(_request: Request, { params }: RouteContext) {
   const { resource } = await params;
 
-  if (!ALLOWED_RESOURCES.has(resource)) {
-    return Response.json({ error: "Unknown market data resource" }, {
-      status: 404,
-    });
-  }
-
-  let lastStatus: number | undefined;
-
-  for (const [index, baseUrl] of UPSTREAM_API_BASE_URLS.entries()) {
-    let upstream: Response;
-    try {
-      upstream = await fetch(`${baseUrl}/${resource}`, {
-        headers: { Accept: "application/json" },
-        next: { revalidate: 300 },
-      });
-    } catch (error) {
-      console.error(
-        `Could not reach Bazar Dor API ${index + 1} (${resource}):`,
-        error,
-      );
-      continue;
-    }
-
-    if (!upstream.ok) {
-      lastStatus = upstream.status;
-      console.warn(
-        `Bazar Dor API ${index + 1} (${resource}) returned ${upstream.status}; trying the alternate API.`,
-      );
-      continue;
-    }
-
-    return new Response(upstream.body, {
-      status: upstream.status,
-      headers: {
-        "Content-Type":
-          upstream.headers.get("Content-Type") ?? "application/json",
-        "Cache-Control": "public, max-age=60, s-maxage=300",
-      },
-    });
-  }
-
-  if (lastStatus === 429) {
+  if (resource !== "categories" && resource !== "products") {
     return Response.json(
-      { error: "Both market data APIs are temporarily rate limited" },
-      { status: 429 },
+      { error: "Unknown market data resource" },
+      {
+      status: 404,
+      },
     );
   }
 
-  return Response.json(
-    { error: "Both market data APIs are unavailable" },
-    { status: 502 },
-  );
+  try {
+    const data =
+      resource === "categories"
+        ? await getMarketCategories()
+        : await getMarketProducts();
+
+    return Response.json(data, {
+      headers: { "Cache-Control": "public, max-age=60, s-maxage=300" },
+    });
+  } catch (error: unknown) {
+    console.error(`Could not load Bazar Dor API resource "${resource}":`, error);
+    const status =
+      error instanceof MarketDataUnavailableError && error.status === 429
+        ? 429
+        : 502;
+    return Response.json(
+      { error: "Bazar Dor market data is temporarily unavailable" },
+      { status },
+    );
+  }
 }

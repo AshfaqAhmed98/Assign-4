@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -100,6 +100,8 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
   const [categoryError, setCategoryError] = useState(false);
   const [productError, setProductError] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
@@ -136,8 +138,33 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !profileMenuRef.current?.contains(event.target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsProfileMenuOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isProfileMenuOpen]);
+
   async function handleSignOut() {
     setIsSigningOut(true);
+    setIsProfileMenuOpen(false);
     try {
       const result = await authClient.signOut();
       if (result.error) {
@@ -185,29 +212,64 @@ export function Navbar({ banglaDate }: { banglaDate: string }) {
               role="status"
             />
           ) : session?.user ? (
-            <>
-              <span
-                aria-label={`${session.user.name} এর প্রোফাইল`}
-                className="inline-flex min-w-0 items-center gap-2"
-                title={session.user.name}
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                aria-expanded={isProfileMenuOpen}
+                aria-haspopup="menu"
+                aria-label={`${session.user.name} এর অ্যাকাউন্ট মেনু`}
+                className="inline-flex min-h-11 max-w-[48vw] items-center gap-2 rounded-lg px-1.5 text-left transition-colors hover:bg-[#f5f8f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#078b4b] sm:px-2"
+                onClick={() => setIsProfileMenuOpen((open) => !open)}
+                type="button"
               >
                 <UserAvatar
                   image={session.user.image}
                   name={session.user.name}
                 />
-                <span className="hidden max-w-36 truncate text-sm font-medium text-[#34423a] sm:inline">
+                <span className="max-w-[25vw] truncate text-xs font-medium text-[#34423a] sm:max-w-36 sm:text-sm">
                   {session.user.name}
                 </span>
-              </span>
-              <button
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#f0d7d4] px-3 text-[13px] leading-6 font-semibold whitespace-nowrap text-[#a33b2e] transition-colors hover:bg-[#fff7f6] disabled:opacity-60 sm:px-4"
-                disabled={isSigningOut}
-                onClick={() => void handleSignOut()}
-                type="button"
-              >
-                {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
+                <svg
+                  aria-hidden="true"
+                  className={`size-3.5 shrink-0 text-[#68736c] transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  />
+                </svg>
               </button>
-            </>
+              {isProfileMenuOpen && (
+                <div
+                  aria-label="অ্যাকাউন্ট অপশন"
+                  className="absolute right-0 top-full z-30 mt-2 w-52 overflow-hidden rounded-xl border border-[#e0e9e2] bg-white p-1.5 shadow-lg"
+                  role="menu"
+                >
+                  <Link
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#34423a] no-underline hover:bg-[#f0f6f2] focus-visible:outline-2 focus-visible:outline-[#078b4b]"
+                    href="/profile"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                    role="menuitem"
+                  >
+                    আমার প্রোফাইল
+                  </Link>
+                  <div aria-hidden="true" className="my-1 border-t border-[#edf1ee]" />
+                  <button
+                    className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-[#a33b2e] hover:bg-[#fff7f6] focus-visible:outline-2 focus-visible:outline-[#d13d39] disabled:cursor-wait disabled:opacity-60"
+                    disabled={isSigningOut}
+                    onClick={() => void handleSignOut()}
+                    role="menuitem"
+                    type="button"
+                  >
+                    {isSigningOut ? "সাইন আউট হচ্ছে…" : "সাইন আউট"}
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link

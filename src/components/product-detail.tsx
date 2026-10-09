@@ -1,8 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getProducts, type Product, type ProductMarket } from "@/lib/api";
+import type { Product, ProductMarket } from "@/lib/api";
 
 const numberFormat = new Intl.NumberFormat("bn-BD", {
   maximumFractionDigits: 2,
@@ -60,66 +57,28 @@ function MarketRow({ market }: { market: ProductMarket }) {
   );
 }
 
-function LoadingState() {
+export function ProductDataUnavailable() {
   return (
-    <main className="flex-1 bg-[#f0f5f1] px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-6xl animate-pulse space-y-5">
-        <div className="h-5 w-48 rounded bg-[#dfe9e1]" />
-        <div className="h-28 rounded-2xl bg-white" />
-        <div className="h-64 rounded-2xl bg-white" />
-      </div>
+    <main className="flex flex-1 items-center justify-center bg-[#f0f5f1] px-4 py-10 sm:px-6">
+      <section className="w-full max-w-xl rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-6 text-center sm:p-8">
+        <h1 className="text-xl font-bold text-[#28332e]">
+          পণ্যের তথ্য পাওয়া যাচ্ছে না
+        </h1>
+        <p className="mt-2 text-sm leading-7 text-[#68736c]">
+          বাজারদরের তথ্য এই মুহূর্তে লোড করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।
+        </p>
+        <Link
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#078b4b] px-5 text-sm font-semibold text-white no-underline hover:bg-[#06743f]"
+          href="/"
+        >
+          হোম পেজে ফিরে যান
+        </Link>
+      </section>
     </main>
   );
 }
 
-export default function ProductDetail({ slug }: { slug: string }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    void getProducts()
-      .then((products) => {
-        if (active) {
-          setProduct(products.find((item) => item.slug === slug) ?? null);
-        }
-      })
-      .catch((error: unknown) => {
-        console.error(`Could not load product details for "${slug}":`, error);
-        if (active) setLoadError(true);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [slug]);
-
-  if (!product && !loadError) return <LoadingState />;
-
-  if (loadError || !product) {
-    return (
-      <main className="flex-1 bg-[#f0f5f1] px-4 py-10 sm:px-6">
-        <div className="mx-auto max-w-6xl rounded-2xl border border-[#e0e9e2] bg-[#fbfdfb] p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-[#28332e]">
-            {loadError ? "পণ্যের তথ্য পাওয়া যায়নি" : "পণ্যটি খুঁজে পাওয়া যায়নি"}
-          </h1>
-          <p className="mt-2 text-sm leading-7 text-[#68736c]">
-            {loadError
-              ? "পণ্যের তথ্য লোড করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।"
-              : "এই ঠিকানায় কোনো পণ্যের তথ্য নেই।"}
-          </p>
-          <Link
-            className="mt-5 inline-flex rounded-lg bg-[#078b4b] px-4 py-2.5 text-sm font-semibold text-white no-underline hover:bg-[#06743f]"
-            href="/#সব-পণ্য"
-          >
-            সব পণ্য দেখুন
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
+export default function ProductDetail({ product }: { product: Product }) {
   const markets = product.markets ?? [];
   const summary = getPriceSummary(product, markets);
   const categoryName = product.categoryNameBn ?? "বাজারপণ্য";

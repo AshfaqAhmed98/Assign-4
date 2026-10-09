@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product-sections";
+import { NotFoundState } from "@/components/not-found-state";
 import { getCategories, getProducts, type Category, type Product } from "@/lib/api";
 
 type SortOrder = "default" | "price-asc" | "price-desc";
@@ -88,7 +89,11 @@ export function CategoryProducts({ slug }: { slug: string }) {
     (product) => product.category === slug,
   );
 
-  if (!category || categoryProducts.length === 0) {
+  if (!category) {
+    return <NotFoundState title="বিভাগটি খুঁজে পাওয়া যায়নি" />;
+  }
+
+  if (categoryProducts.length === 0) {
     return (
       <main className="flex-1 bg-[#f0f5f1] px-4 py-6 sm:px-6 sm:py-8">
         <section
@@ -96,7 +101,7 @@ export function CategoryProducts({ slug }: { slug: string }) {
           className="mx-auto flex max-w-6xl flex-col items-center rounded-2xl border border-[#dce8df] bg-[#fbfdfb] px-5 py-12 text-center sm:py-16"
         >
           <span aria-hidden="true" className="text-5xl">
-            {category?.icon ?? "🔎"}
+            {category.icon}
           </span>
           <p className="mt-4 text-sm font-semibold tracking-wide text-[#078b4b]">
             ৪০৪
@@ -105,14 +110,10 @@ export function CategoryProducts({ slug }: { slug: string }) {
             className="mt-2 text-2xl font-bold text-[#1f2b23] sm:text-3xl"
             id="category-empty-title"
           >
-            {category
-              ? `${category.nameBn} বিভাগে কোনো পণ্য নেই`
-              : "বিভাগটি খুঁজে পাওয়া যায়নি"}
+            {`${category.nameBn} বিভাগে কোনো পণ্য নেই`}
           </h1>
           <p className="mt-2 max-w-lg text-sm leading-7 text-[#68736c]">
-            {category
-              ? "এই বিভাগে এখনো কোনো পণ্যের তথ্য পাওয়া যায়নি।"
-              : "আপনার খোঁজা বিভাগটি পাওয়া যায়নি।"}
+            এই বিভাগে এখনো কোনো পণ্যের তথ্য পাওয়া যায়নি।
           </p>
           <HomeLink />
         </section>
@@ -152,25 +153,41 @@ export function CategoryProducts({ slug }: { slug: string }) {
           <label className="text-sm text-[#68736c]" htmlFor="category-sort">
             সাজান:
           </label>
-          <select
-            className="min-h-9 rounded-lg border border-[#dce8df] bg-white px-3 text-sm text-[#28332e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#078b4b]"
-            id="category-sort"
-            onChange={(event) => {
-              const value = event.currentTarget.value;
-              if (
-                value === "default" ||
-                value === "price-asc" ||
-                value === "price-desc"
-              ) {
-                setSortOrder(value);
-              }
-            }}
-            value={sortOrder}
-          >
-            <option value="default">ডিফল্ট</option>
-            <option value="price-asc">দাম: কম থেকে বেশি</option>
-            <option value="price-desc">দাম: বেশি থেকে কম</option>
-          </select>
+          <div className="relative">
+            <select
+              className="min-h-9 appearance-none rounded-lg border border-[#dce8df] bg-white py-1 pl-3 pr-9 text-sm text-[#28332e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#078b4b]"
+              id="category-sort"
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                if (
+                  value === "default" ||
+                  value === "price-asc" ||
+                  value === "price-desc"
+                ) {
+                  setSortOrder(value);
+                }
+              }}
+              value={sortOrder}
+            >
+              <option value="default">ডিফল্ট</option>
+              <option value="price-asc">দাম: কম থেকে বেশি</option>
+              <option value="price-desc">দাম: বেশি থেকে কম</option>
+            </select>
+            <svg
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#68736c]"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="m6 9 6 6 6-6"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </div>
         </div>
 
         <p className="my-3 text-sm text-[#77827c]">
