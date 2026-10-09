@@ -16,7 +16,7 @@ const unitNames: Record<string, string> = {
   piece: "প্রতি পিস",
 };
 
-function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: Product }) {
   const isUp = product.change.dir === "up";
   const isDown = product.change.dir === "down";
   const changeBadge = isUp
